@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT Trading Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK (v9 Modular CDN) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Cấu hình Firebase dự án boy-crypto
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZU9818zImENRSN87LT1sJB6",
+            authDomain: "boy-crypto.firebaseapp.com",
+            databaseURL: "https://boy-crypto-default-rtdb.firebaseio.com",
+            projectId: "boy-crypto",
+            storageBucket: "boy-crypto.firebasestorage.app",
+            messagingSenderId: "731283041251",
+            appId: "1:731283041251:web:3c22780e6780",
+            measurementId: "G-FDSK3E3VFF"
+        };
+
+        // Khởi tạo Firebase App & Realtime Database
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Khởi tạo Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const ADMIN_ID = 5734031817;
+        const user = tg.initDataUnsafe?.user || { id: 12345678, first_name: "Demo User" };
+        const isAdmin = user.id === ADMIN_ID;
+
+        // Cấu hình Tỷ giá & Phí
+        const BASE_RATE = 25400; // Tỷ giá gốc VND/USDT
+        const MARKUP = 0.05;     // 5% phí chênh lệch
+        const FIXED_FEE = 0.05;  // Phí cố định 0.05 USDT
+        const FINAL_RATE = BASE_RATE * (1 + MARKUP);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (isAdmin) {
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                initAdminPanel();
+            } else {
+                document.getElementById('user-store').classList.remove('hidden');
+                initUserStore();
+            }
+        });
+
+        // ================= XỬ LÝ GIAO DIỆN USER =================
+        function initUserStore() {
+            document.getElementById('rate-display').innerText = `${FINAL_RATE.toLocaleString('vi-VN')} VND / USDT`;
+            
+            const usdtInput = document.getElementById('usdt-amount');
+            usdtInput.addEventListener('input', () => {
+                const amount = parseFloat(usdtInput.value) || 0;
+                const totalVnd = (amount * FINAL_RATE).toLocaleString('vi-VN');
+                document.getElementById('vnd-total').innerText = `${totalVnd} VND`;
+                document.getElementById('fee-display').innerText = `${FIXED_FEE} USDT`;
+            });
+
+            document.getElementById('buy-btn').addEventListener('click', () => {
+                const amount = parseFloat(usdtInput.value);
+                const wallet = document.getElementById('wallet-address').value.trim();
+
+                if (!amount || amount <= 0) return alert('Vui lòng nhập số lượng USDT hợp lệ!');
+                if (!wallet) return alert('Vui lòng nhập địa chỉ ví nhận USDT!');
+
+                const orderRef = push(ref(db, 'orders'));
+                set(orderRef, {
+                    orderId: orderRef.key,
+                    userId: user.id,
+                    userName: user.first_name || 'Khách hàng',
+                    amount: amount,
+                    totalVnd: amount * FINAL_RATE,
+                    wallet: wallet,
+                    status: 'PENDING',
+                    createdAt: Date.now()
+                }).then(() => {
+                    alert('Đơn hàng đã được gửi thành công! Vui lòng thực hiện chuyển khoản.');
+                    document.getElementById('payment-info').classList.remove('hidden');
+                }).catch((err) => {
+                    alert('Có lỗi xảy ra: ' + err.message);
+                });
+            });
+        }
+
+        // ================= XỬ LÝ GIAO DIỆN ADMIN =================
+        function initAdminPanel() {
+            const ordersRef = ref(db, 'orders');
+            onValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                const listEl = document.getElementById('orders-list');
+                listEl.innerHTML = '';
+
+                if (!data) {
+                    listEl.innerHTML = '<p class="text-gray-500 text-center py-6">Chưa có đơn hàng nào.</p>';
+                    return;
+                }
+
+                Object.values(data).reverse().forEach(order => {
+                    const card = document.createElement('div');
+                    card.className = "bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700 shadow-lg";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-blue-400">#${order.orderId.slice(-6)}</span>
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(order.status)}">${order.status}</span>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <p><span class="text-gray-400">Khách hàng:</span> <b>${order.userName}</b> (ID: ${order.userId})</p>
+                            <p><span class="text-gray-400">Số lượng mua:</span> <b class="text-yellow-400">${order.amount} USDT</b></p>
+                            <p><span class="text-gray-400">Cần chuyển:</span> <b class="text-green-400">${order.totalVnd.toLocaleString('vi-VN')} VND</b></p>
+                            <p class="text-xs text-gray-400 break-all bg-gray-900 p-2 rounded mt-2">Ví: ${order.wallet}</p>
+                        </div>
+                        ${order.status === 'PENDING' ? `
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="updateOrderStatus('${order.orderId}', 'APPROVED')" class="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg text-sm font-bold transition">Duyệt</button>
+                                <button onclick="updateOrderStatus('${order.orderId}', 'REJECTED')" class="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-bold transition">Từ chối</button>
+                            </div>
+                        ` : ''}
+                    `;
+                    listEl.appendChild(card);
+                });
+            });
+        }
+
+        window.updateOrderStatus = (orderId, status) => {
+            update(ref(db, `orders/${orderId}`), { status: status });
+        };
+
+        function getStatusClass(status) {
+            if (status === 'APPROVED') return 'bg-green-900/80 text-green-300 border border-green-600';
+            if (status === 'REJECTED') return 'bg-red-900/80 text-red-300 border border-red-600';
+            return 'bg-yellow-900/80 text-yellow-300 border border-yellow-600';
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4 font-sans antialiased">
+
+    <!-- GIAO DIỆN KHÁCH HÀNG (USER STORE) -->
+    <div id="user-store" class="hidden max-w-md mx-auto space-y-4">
+        <div class="text-center space-y-1">
+            <h1 class="text-2xl font-bold text-blue-400">Mua USDT Nhanh Chóng</h1>
+            <p class="text-xs text-gray-400">Tự động đồng bộ Realtime qua Telegram Mini App</p>
+        </div>
+        
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl space-y-4">
+            <div class="flex justify-between items-center text-sm bg-gray-900/50 p-3 rounded-lg border border-gray-700/50">
+                <span class="text-gray-400">Tỷ giá hiện tại:</span>
+                <span id="rate-display" class="font-bold text-green-400">Đang tải...</span>
+            </div>
+            
+            <div>
+                <label class="block text-xs text-gray-400 mb-1">Số lượng USDT muốn mua</label>
+                <input id="usdt-amount" type="number" step="any" placeholder="100" class="w-full bg-gray-700/80 p-3 rounded-xl border border-gray-600 text-white focus:outline-none focus:border-blue-500 font-semibold">
+            </div>
+
+            <div>
+                <label class="block text-xs text-gray-400 mb-1">Địa chỉ ví nhận USDT (BEP20 / TRC20)</label>
+                <input id="wallet-address" type="text" placeholder="Nhập địa chỉ ví 0x... hoặc T..." class="w-full bg-gray-700/80 p-3 rounded-xl border border-gray-600 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
+            </div>
+
+            <div class="border-t border-gray-700 pt-3 space-y-1.5 text-sm">
+                <div class="flex justify-between text-gray-400">
+                    <span>Phí cố định:</span>
+                    <span id="fee-display" class="text-white">0.05 USDT</span>
+                </div>
+                <div class="flex justify-between text-base font-bold pt-1">
+                    <span>Tổng tiền thanh toán:</span>
+                    <span id="vnd-total" class="text-green-400">0 VND</span>
+                </div>
+            </div>
+
+            <button id="buy-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition active:scale-[0.98]">Xác Nhận Tạo Đơn Hàng</button>
+        </div>
+
+        <!-- KHUNG THÔNG TIN CHUYỂN KHỎAN MBBANK -->
+        <div id="payment-info" class="hidden bg-gray-800/90 p-4 rounded-2xl border border-blue-500/50 space-y-2 text-sm shadow-xl">
+            <h3 class="font-bold text-blue-400 text-base border-b border-gray-700 pb-2">Thông Tin Thanh Toán Ngân Hàng</h3>
+            <div class="space-y-1">
+                <p class="flex justify-between"><span class="text-gray-400">Ngân hàng:</span> <b>MBBank</b></p>
+                <p class="flex justify-between"><span class="text-gray-400">Số tài khoản:</span> <b class="text-yellow-400 text-base">797968682525</b></p>
+                <p class="flex justify-between"><span class="text-gray-400">Chủ tài khoản:</span> <b>BOY CRYPTO ADMIN</b></p>
+            </div>
+            <p class="text-xs text-gray-400 mt-2 bg-gray-900/80 p-2.5 rounded-lg border border-gray-700">* Sau khi chuyển khoản xong, đơn hàng sẽ gửi tới Admin để xác nhận trực tiếp trong ứng dụng.</p>
+        </div>
+    </div>
+
+    <!-- GIAO DIỆN QUẢN TRỊ ADMIN (ADMIN DASHBOARD) -->
+    <div id="admin-dashboard" class="hidden max-w-md mx-auto space-y-4">
+        <div class="text-center space-y-1">
+            <h1 class="text-2xl font-bold text-red-400">Bảng Quản Lý Admin</h1>
+            <p class="text-xs text-gray-400">Duyệt & Từ chối đơn hàng Realtime</p>
+        </div>
+        <div id="orders-list">
+            <!-- Đơn hàng sẽ tự động render ở đây -->
+        </div>
+    </div>
+
+</body>
+</html>
