@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BoY CRYPTO - Mua Bán USDT Uy Tín</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .crypto-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid #334155;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+    </style>
+</head>
+<body class="pb-10">
+
+    <!-- Header / Profile User Telegram -->
+    <div class="p-4 flex items-center justify-between border-b border-slate-800 bg-slate-900/80 sticky top-0 z-40 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-lg overflow-hidden border border-blue-400" id="user-avatar-container">
+                <span id="user-initial">B</span>
+                <img id="user-avatar" src="" class="w-full h-full object-cover hidden" alt="Avatar">
+            </div>
+            <div>
+                <h1 class="font-bold text-base text-white flex items-center gap-2">
+                    BoY CRYPTO 
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Verified</span>
+                </h1>
+                <p class="text-xs text-slate-400" id="user-display-name">Xin chào, Khách hàng</p>
+            </div>
+        </div>
+        <a href="https://t.me/ii7_luf" target="_blank" class="w-9 h-9 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <i class="fa-paper-plane fab"></i>
+        </a>
+    </div>
+
+    <div class="max-w-md mx-auto p-4 space-y-5">
+
+        <!-- Tỷ giá hiển thị -->
+        <div class="crypto-card rounded-2xl p-4 shadow-xl">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">Tỷ giá quy đổi hiện tại</span>
+                <span class="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Tự động 24/7
+                </span>
+            </div>
+            <div class="flex items-baseline justify-between">
+                <div class="text-2xl font-extrabold text-white">
+                    1 USDT = <span id="exchange-rate-display" class="text-blue-400">26,670</span> VNĐ
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Mua USDT -->
+        <div class="crypto-card rounded-2xl p-5 shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i class="fa-solid fa-cart-shopping text-blue-500"></i> Mua USDT
+            </h2>
+
+            <!-- 1. Mạng chuyển -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Chọn Mạng Lưới (Blockchain)</label>
+                <div class="relative">
+                    <select id="network-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-blue-500 appearance-none pr-10">
+                        <option value="TRC20">Tron (TRC20)</option>
+                        <option value="BEP20">BNB Smart Chain (BEP20)</option>
+                        <option value="ERC20">Ethereum (ERC20)</option>
+                        <option value="POLYGON">Polygon (POL)</option>
+                        <option value="SOL">Solana (SOL)</option>
+                        <option value="ARBITRUM">Arbitrum One</option>
+                        <option value="TON">TON Network</option>
+                    </select>
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Số lượng mua -->
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="block text-xs font-semibold text-slate-300">2. Số lượng USDT cần mua</label>
+                    <span class="text-[11px] text-amber-400">Tối thiểu: 10 USDT</span>
+                </div>
+                <div class="relative">
+                    <input type="number" id="usdt-amount" value="10" min="10" step="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-base font-bold text-white focus:outline-none focus:border-blue-500 pr-16" placeholder="Nhập số lượng">
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">
+                        USDT
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thành tiền VNĐ -->
+            <div class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-800 space-y-2">
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Tổng tiền thanh toán:</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xl font-extrabold text-emerald-400" id="total-vnd-display">266,700 VNĐ</span>
+                </div>
+            </div>
+
+            <!-- 3. Địa chỉ ví -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">3. Địa chỉ ví nhận USDT của bạn</label>
+                <input type="text" id="wallet-address" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-blue-500 font-mono" placeholder="Nhập chính xác địa chỉ ví">
+            </div>
+
+            <!-- 4. Username Telegram -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">4. @username Telegram liên hệ</label>
+                <div class="relative">
+                    <input type="text" id="telegram-username" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-blue-500 pl-8" placeholder="username">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">@</span>
+                </div>
+            </div>
+
+            <!-- 5. Email (không bắt buộc) -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">5. Email nhận hóa đơn <span class="text-slate-500 font-normal">(không bắt buộc)</span></label>
+                <input type="email" id="user-email" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="name@example.com">
+            </div>
+
+            <!-- Nút mua -->
+            <button id="btn-submit" onclick="processPurchase()" class="w-full btn-primary text-white font-bold py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2 text-base mt-2">
+                <i class="fa-solid fa-bolt"></i> XÁC NHẬN MUA USDT
+            </button>
+        </div>
+
+        <!-- Thông tin uy tín -->
+        <div class="crypto-card rounded-2xl p-5 shadow-xl space-y-4">
+            <h3 class="font-bold text-white border-b border-slate-800 pb-2 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i> Cách mua USDT đơn giản & An toàn
+            </h3>
+            <ul class="text-xs text-slate-300 space-y-2.5">
+                <li class="flex items-start gap-2">
+                    <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">1</span>
+                    <span>Nhập số lượng USDT cần mua và chọn mạng chuyển tương ứng với ví của bạn.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">2</span>
+                    <span>Điền chính xác địa chỉ ví nhận USDT và thông tin liên hệ Telegram.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold mt-0.5 shrink-0">3</span>
+                    <span>Quét mã VietQR thanh toán đúng số tiền và nội dung đơn hàng. Hệ thống tự động chuyển USDT sau 1-3 phút.</span>
+                </li>
+            </ul>
+
+            <div class="pt-2 border-t border-slate-800">
+                <h4 class="font-bold text-white text-xs mb-1">USDT (Tether) là gì?</h4>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    USDT là đồng tiền mã hóa (Stablecoin) được bảo chứng 1:1 với đồng Đô la Mỹ (USD). Đây là tài sản lưu trữ an toàn và phổ biến nhất trên thị trường Tiền điện tử toàn cầu.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL THANH TOÁN VIETQR -->
+    <div id="qr-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="crypto-card rounded-2xl w-full max-w-sm p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-base">Thanh Toán Đơn Hàng</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Khung Mã QR -->
+            <div class="bg-white p-3 rounded-xl flex flex-col items-center justify-center text-center shadow-inner">
+                <img id="vietqr-image" src="" class="w-56 h-56 object-contain rounded-lg" alt="VietQR Payment">
+                
+                <button onclick="openQROutside()" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> MỞ MÃ VIETQR TRÊN TRÌNH DUYỆT NGOÀI
+                </button>
+            </div>
+
+            <!-- Thông tin ngân hàng -->
+            <div class="bg-slate-900 rounded-xl p-3 space-y-2 text-xs border border-slate-800">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Ngân hàng:</span>
+                    <span class="font-bold text-white">MBBANK</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Chủ tài khoản:</span>
+                    <span class="font-bold text-white">BOY CRYPTO</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Số tài khoản:</span>
+                    <div class="flex items-center gap-1">
+                        <span class="font-mono font-bold text-emerald-400">797968682525</span>
+                        <button onclick="copyText('797968682525')" class="text-slate-400 hover:text-white px-1"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Số tiền:</span>
+                    <div class="flex items-center gap-1">
+                        <span class="font-bold text-emerald-400" id="modal-amount">0 VNĐ</span>
+                        <button onclick="copyText(currentVndAmount)" class="text-slate-400 hover:text-white px-1"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-800 pt-2">
+                    <span class="text-slate-400">Nội dung CK:</span>
+                    <div class="flex items-center gap-1">
+                        <span class="font-mono font-extrabold text-amber-400" id="modal-memo">BOY123456</span>
+                        <button onclick="copyText(currentMemo)" class="text-slate-400 hover:text-white px-1"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Hỗ trợ Telegram:</span>
+                    <a href="https://t.me/ii7_luf" target="_blank" class="font-bold text-blue-400 hover:underline">@ii7_luf</a>
+                </div>
+            </div>
+
+            <!-- Nút xác nhận chuyển khoản -->
+            <button onclick="confirmPaid()" class="w-full btn-success text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm">
+                <i class="fa-solid fa-circle-check"></i> TÔI ĐÃ CHUYỂN KHOẢN
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const BASE_USD_RATE = 25400; // Tỷ giá cơ sở
+        const MARKUP_PERCENT = 0.05;  // +5%
+        const BLOCKCHAIN_FEE = 0.05;  // 0.05 USDT
+        const BANK_ID = "MB";
+        const ACCOUNT_NO = "797968682525";
+        const ACCOUNT_NAME = "BOY CRYPTO";
+
+        let currentVndAmount = 0;
+        let currentMemo = "";
+        let currentQRUrl = "";
+
+        // Tích hợp Telegram SDK
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            const tgUser = tg.initDataUnsafe?.user;
+
+            if (tgUser) {
+                const displayName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ");
+                document.getElementById('user-display-name').innerText = displayName || "Khách hàng Telegram";
+                if (tgUser.username) {
+                    document.getElementById('telegram-username').value = tgUser.username;
+                }
+                if (tgUser.photo_url) {
+                    const avatarImg = document.getElementById('user-avatar');
+                    avatarImg.src = tgUser.photo_url;
+                    avatarImg.classList.remove('hidden');
+                    document.getElementById('user-initial').classList.add('hidden');
+                } else if (displayName) {
+                    document.getElementById('user-initial').innerText = displayName.charAt(0).toUpperCase();
+                }
+            }
+        }
+
+        // Tính toán tỷ giá
+        function calculateTotal() {
+            const usdtInput = parseFloat(document.getElementById('usdt-amount').value) || 0;
+            const rateWithMarkup = BASE_USD_RATE * (1 + MARKUP_PERCENT);
+            document.getElementById('exchange-rate-display').innerText = Math.round(rateWithMarkup).toLocaleString('vi-VN');
+
+            const totalUsdtNeeded = usdtInput + BLOCKCHAIN_FEE;
+            currentVndAmount = Math.round(totalUsdtNeeded * rateWithMarkup);
+
+            document.getElementById('total-vnd-display').innerText = currentVndAmount.toLocaleString('vi-VN') + " VNĐ";
+        }
+
+        document.getElementById('usdt-amount').addEventListener('input', calculateTotal);
+        calculateTotal();
+
+        // Xử lý tạo đơn Mua
+        async function processPurchase() {
+            const amount = parseFloat(document.getElementById('usdt-amount').value);
+            const network = document.getElementById('network-select').value;
+            const wallet = document.getElementById('wallet-address').value.trim();
+            const tele = document.getElementById('telegram-username').value.trim();
+            const email = document.getElementById('user-email').value.trim();
+
+            if (!amount || amount < 10) {
+                alert("Số lượng mua tối thiểu là 10 USDT!");
+                return;
+            }
+            if (!wallet) {
+                alert("Vui lòng nhập địa chỉ ví nhận USDT!");
+                return;
+            }
+            if (!tele) {
+                alert("Vui lòng nhập @username Telegram để liên hệ!");
+                return;
+            }
+
+            // Tạo mã đơn ngẫu nhiên
+            const orderId = Math.floor(100000 + Math.random() * 900000);
+            currentMemo = `BOY${orderId}`;
+
+            // Tạo mã VietQR
+            currentQRUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${currentVndAmount}&addInfo=${encodeURIComponent(currentMemo)}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
+            
+            document.getElementById('vietqr-image').src = currentQRUrl;
+            document.getElementById('modal-amount').innerText = currentVndAmount.toLocaleString('vi-VN') + " VNĐ";
+            document.getElementById('modal-memo').innerText = currentMemo;
+            
+            document.getElementById('qr-modal').classList.remove('hidden');
+
+            // Gọi Server Backend gửi email thông báo
+            try {
+                await fetch('/api/send-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: currentMemo,
+                        usdtAmount: amount,
+                        vndAmount: currentVndAmount,
+                        network: network,
+                        wallet: wallet,
+                        telegram: tele,
+                        userEmail: email
+                    })
+                });
+            } catch (err) {
+                console.error("Lỗi gửi thông báo đơn:", err);
+            }
+        }
+
+        function openQROutside() {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                window.Telegram.WebApp.openLink(currentQRUrl);
+            } else {
+                window.open(currentQRUrl, '_blank');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        function confirmPaid() {
+            alert("Cảm ơn bạn! Vui lòng chờ 1-3 phút để Admin xác nhận và chuyển USDT vào ví.");
+            closeModal();
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            alert("Đã sao chép: " + text);
+        }
+    </script>
+</body>
+</html>
